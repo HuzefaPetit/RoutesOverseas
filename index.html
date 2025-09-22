@@ -234,10 +234,10 @@
         <div class="logo-section">
             <div class="logo-container">
                 <!-- Replace the src with your actual image path -->
-                <img src="RO.jpg" alt="Company Logo" style="display: none;" onload="this.style.display='block'; this.nextElementSibling.style.display='none';" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <img src="RO1.jpg" alt="Company Logo" style="display: none;" onload="this.style.display='block'; this.nextElementSibling.style.display='none';" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                 
                 <div class="logo-placeholder">
-                    <div style="font-size: 24px; margin-bottom: 10px;">🏢</div>
+                    <div style="font-size: 24px; margin-bottom: 10px;">??</div>
                     <div>Replace with Your Logo</div>
                     <div style="font-size: 14px; opacity: 0.7; margin-top: 5px;">Update the src attribute above</div>
                 </div>
@@ -247,14 +247,14 @@
         <!-- Form Section -->
         <div class="form-section">
             <h2 class="form-title">Contact Us</h2>
-            <form id="contactForm">
+            <form id="contactForm" action="mailto:your-email@example.com" method="post" enctype="text/plain">
                 <div class="form-row">
                     <div class="form-group">
                         <label for="name">Name *</label>
                         <input type="text" id="name" name="name" required>
                     </div>
                     <div class="form-group">
-                        <label for="phone">Phone No/Contact No *</label>
+                        <label for="phone">Mobile No *</label>
                         <input type="tel" id="phone" name="phone" required>
                     </div>
                 </div>
@@ -276,15 +276,32 @@
                 </div>
 
                 <div class="form-group">
+                    <label for="inquiryType">Inquiry Type *</label>
+                    <select id="inquiryType" name="inquiryType" required>
+                        <option value="">Please select inquiry type</option>
+                        <option value="Admission / Oer">Admission / Oer</option>
+                        <option value="Airport Pickup">Airport Pickup</option>
+                        <option value="Dependent & Parents Visa">Dependent & Parents Visa</option>
+                        <option value="Education Loan">Education Loan</option>
+                        <option value="Food & Accommodation">Food & Accommodation</option>
+                        <option value="IELTS Coaching">IELTS Coaching</option>
+                        <option value="Interview Preparation">Interview Preparation</option>
+                        <option value="PR & Citizenship">PR & Citizenship</option>
+                        <option value="Visa Application" selected>Visa Application</option>
+                        <option value="Visitor & Work Permit">Visitor & Work Permit</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
                     <label for="inquiry">Inquiry Details</label>
                     <textarea id="inquiry" name="inquiry" placeholder="Please describe your inquiry in detail..."></textarea>
                 </div>
 
                 <div class="captcha-container">
+				 <label for="captcha">Enter Captcha Code *</label>
                     <div class="captcha-code" id="captchaCode"></div>
-                    <button type="button" class="refresh-captcha" onclick="generateCaptcha()" title="Refresh Captcha">🔄</button>
-                    <div class="captcha-input">
-                        <label for="captcha">Enter Captcha Code *</label>
+                    <button type="button" class="refresh-captcha" onclick="generateCaptcha()" title="Refresh Captcha">??</button>
+                    <div class="captcha-input">                       
                         <input type="text" id="captcha" name="captcha" placeholder="Enter the code" required>
                     </div>
                 </div>
@@ -319,19 +336,56 @@
                 return;
             }
             
+            // Show loading state
+            const submitBtn = document.querySelector('.submit-btn');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Submitting...';
+            submitBtn.disabled = true;
+            
             // Collect form data
-            const formData = new FormData(this);
-            const data = {};
-            for (let [key, value] of formData.entries()) {
-                data[key] = value;
-            }
+            const formData = {
+                name: document.getElementById('name').value,
+                phone: document.getElementById('phone').value,
+                address: document.getElementById('address').value,
+                email: document.getElementById('email').value,
+                city: document.getElementById('city').value,
+                inquiryType: document.getElementById('inquiryType').value,
+                inquiry: document.getElementById('inquiry').value
+            };
             
-            console.log('Form submitted with data:', data);
-            alert('Thank you! Your inquiry has been submitted successfully.');
+            // Replace with your actual Google Apps Script Web App URL
+            const scriptURL = 'https://script.google.com/macros/s/AKfycbx5DyMXFTLxunolRGE0EtpmgHXB7YG3J3qX2pOdlOJS_KWavi1TZSPbN7d1bBJ-aoPOmQ/exec';
             
-            // Reset form and generate new captcha
-            this.reset();
-            generateCaptcha();
+            // Send data to Google Sheets
+            fetch(scriptURL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+                mode: 'no-cors'  // Required for Google Apps Script
+            })
+            .then(response => {
+                // Reset button state
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+                
+                alert('Thank you! Your inquiry has been submitted successfully and saved to our records.');
+                
+                // Reset form and generate new captcha
+                document.getElementById('contactForm').reset();
+                generateCaptcha();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                
+                // Reset button state
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+                
+                alert('There was an error submitting your form. Please try again.');
+                generateCaptcha();
+            });
         });
 
         // Generate initial captcha when page loads
